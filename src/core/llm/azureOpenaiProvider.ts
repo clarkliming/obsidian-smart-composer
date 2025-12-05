@@ -12,6 +12,12 @@ import {
 } from '../../types/llm/response'
 import { LLMProvider } from '../../types/provider.types'
 
+import {
+  LLMAPIKeyInvalidException,
+  LLMAPIKeyNotSetException,
+  LLMRateLimitExceededException,
+} from './exception'
+
 import { BaseLLMProvider } from './base'
 import { OpenAIMessageAdapter } from './openaiMessageAdapter'
 
@@ -57,9 +63,25 @@ export class AzureOpenAIProvider extends BaseLLMProvider<
     return this.adapter.streamResponse(this.client, request, options)
   }
 
-  async getEmbedding(_model: string, _text: string): Promise<number[]> {
-    throw new Error(
-      `Provider ${this.provider.id} does not support embeddings. Please use a different provider.`,
-    )
+  async getEmbedding(model: string, text: string): Promise<number[]> {
+    if (!this.client.apiKey) {
+      throw new LLMAPIKeyNotSetException(
+        `Provider ${this.provider.id} API key is missing. Please set it in settings menu.`,
+      )
+    }
+    try {
+      const embedding = await this.client.embeddings.create({
+        model: model,
+        input: text,
+      })
+      return embedding.data[0].embedding
+    } catch (error) {
+      if (error.status === 429) {
+        throw new LLMRateLimitExceededException(
+          'OpenAI API rate limit exceeded. Please try again later.',
+        )
+      }
+      throw error
+    }
   }
 }

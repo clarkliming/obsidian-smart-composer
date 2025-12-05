@@ -112,7 +112,7 @@ export const PROVIDER_TYPES_INFO = {
     defaultProviderId: null, // no default provider for this type
     requireApiKey: true,
     requireBaseUrl: true,
-    supportEmbedding: false,
+    supportEmbedding: true,
     additionalSettings: [
       {
         label: 'Deployment',

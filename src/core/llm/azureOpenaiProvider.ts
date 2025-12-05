@@ -78,7 +78,7 @@ export class AzureOpenAIProvider extends BaseLLMProvider<
     } catch (error) {
       if (error.status === 429) {
         throw new LLMRateLimitExceededException(
-          'OpenAI API rate limit exceeded. Please try again later.',
+          'Azure OpenAI API rate limit exceeded. Please try again later.',
         )
       }
       throw error
